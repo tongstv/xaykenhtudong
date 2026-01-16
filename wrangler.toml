@@ -1,0 +1,19 @@
+
+name = "auto"
+main = "src/index.js"
+compatibility_date = "2024-12-01"
+[[d1_databases]]
+binding = "DB"
+database_name = "tiktok_db"
+database_id = "75365d99-5442-45bd-8b5b-9019e0ab133b"
+[[queues.producers]]
+queue = "tiktok-queue"
+binding = "QUEUE"
+[browser]
+binding = "BROWSER"
+[triggers]
+crons = ["*/1 * * * *"]
+
+[assets]
+directory = "./public"
+run_worker_first = true

@@ -1,0 +1,11 @@
+<h3>History</h3>
+<ul id="history"></ul>
+
+<script>
+    apiFetch("/api/history/list")
+        .then(r=>r.json())
+        .then(list=>{
+            document.getElementById("history").innerHTML=
+                list.map(i=>`<li>${i.id}</li>`).join("");
+        });
+</script>

@@ -1,0 +1,175 @@
+<!-- PAGE HEADER -->
+<div class="page-head">
+    <div>
+        <h1>TikTok Accounts</h1>
+        <p>Quản lý tài khoản TikTok dùng cho automation</p>
+    </div>
+    <button class="btn btn-primary" id="btnAddTikTok">
+        <i class="bi bi-plus-lg"></i> Thêm tài khoản
+    </button>
+</div>
+
+<!-- TABLE -->
+<div class="card mt-3">
+    <div class="table-wrap">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                <tr>
+                    <th style="width:60px">#</th>
+                    <th>Username</th>
+                    <th>TikTok ID</th>
+                    <th style="width:140px">Status</th>
+                    <th style="width:160px">Action</th>
+                </tr>
+                </thead>
+                <tbody id="tiktokTbody">
+                <tr>
+                    <td colspan="5" class="text-center text-muted">Loading...</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal fade" id="tiktokModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="tiktokModalTitle">Add TikTok</h5>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <input type="hidden" id="tt_id">
+
+                <div class="mb-3">
+                    <label class="form-label">TikTok Username</label>
+                    <input class="form-control" id="tt_username" placeholder="@username">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">TikTok ID</label>
+                    <input class="form-control" id="tt_tiktok_id">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Cookie</label>
+                    <textarea class="form-control" id="tt_cookie" rows="4"></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Status</label>
+                    <select class="form-select" id="tt_status">
+                        <option value="active">Active</option>
+                        <option value="disabled">Disabled</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-primary" id="btnSaveTikTok">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (() => {
+        const modal = new bootstrap.Modal(document.getElementById("tiktokModal"));
+
+        async function loadTikTok() {
+            const res = await fetch("/api/tiktok/list");
+            if (!res.ok) {
+                location.href = "/admin/login.html";
+                return;
+            }
+            const list = await res.json();
+
+            const rows = list.map((i, idx) => `
+      <tr>
+        <td>${idx + 1}</td>
+        <td>${i.username || ""}</td>
+        <td>${i.tiktok_id || ""}</td>
+        <td>
+          <span class="badge ${i.status === "active" ? "badge-success" : "badge-secondary"}">
+            ${i.status}
+          </span>
+        </td>
+        <td>
+          <button class="btn btn-sm btn-outline-primary me-1" onclick="editTikTok(${i.id})">
+            <i class="bi bi-pencil"></i>
+          </button>
+          <button class="btn btn-sm btn-outline-danger" onclick="deleteTikTok(${i.id})">
+            <i class="bi bi-trash"></i>
+          </button>
+        </td>
+      </tr>
+    `).join("");
+
+            document.getElementById("tiktokTbody").innerHTML =
+                rows || `<tr><td colspan="5" class="text-center text-muted">No data</td></tr>`;
+        }
+
+        window.editTikTok = async (id) => {
+            const res = await fetch("/api/tiktok/list");
+            const list = await res.json();
+            const i = list.find(x => x.id === id);
+
+            document.getElementById("tiktokModalTitle").innerText = "Edit TikTok";
+            tt_id.value = i.id;
+            tt_username.value = i.username;
+            tt_tiktok_id.value = i.tiktok_id;
+            tt_cookie.value = i.cookie;
+            tt_status.value = i.status;
+
+            modal.show();
+        };
+
+        window.deleteTikTok = async (id) => {
+            if (!confirm("Delete this TikTok account?")) return;
+            await fetch("/api/tiktok/delete", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id })
+            });
+            loadTikTok();
+        };
+
+        document.getElementById("btnAddTikTok").onclick = () => {
+            document.getElementById("tiktokModalTitle").innerText = "Add TikTok";
+            tt_id.value = "";
+            tt_username.value = "";
+            tt_tiktok_id.value = "";
+            tt_cookie.value = "";
+            tt_status.value = "active";
+            modal.show();
+        };
+
+        document.getElementById("btnSaveTikTok").onclick = async () => {
+            const payload = {
+                id: tt_id.value || undefined,
+                username: tt_username.value,
+                tiktok_id: tt_tiktok_id.value,
+                cookie: tt_cookie.value,
+                status: tt_status.value
+            };
+
+            const api = payload.id ? "/api/tiktok/update" : "/api/tiktok/create";
+
+            await fetch(api, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+
+            modal.hide();
+            loadTikTok();
+        };
+
+        loadTikTok();
+    })();
+</script>

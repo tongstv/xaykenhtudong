@@ -1,0 +1,165 @@
+<!-- PAGE HEADER -->
+<div class="page-head mb-3">
+    <div>
+        <h1>Dashboard</h1>
+        <p>Tổng quan hệ thống tự động TikTok & tiến trình Browser</p>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-outline-secondary" id="btnRefreshDash">
+            <i class="bi bi-arrow-repeat"></i> Refresh
+        </button>
+    </div>
+</div>
+
+<!-- STATS -->
+<div class="row g-3">
+    <div class="col-xl-3 col-md-6">
+        <div class="card stat-card">
+            <div class="stat-body">
+                <div>
+                    <div class="stat-label">TikTok Accounts</div>
+                    <div class="stat-value" id="statAccounts">--</div>
+                </div>
+                <div class="stat-icon bg-primary-soft">
+                    <i class="bi bi-person-badge"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="card stat-card">
+            <div class="stat-body">
+                <div>
+                    <div class="stat-label">Running Tasks</div>
+                    <div class="stat-value text-warning" id="statRunning">--</div>
+                </div>
+                <div class="stat-icon bg-warning-soft">
+                    <i class="bi bi-play-circle"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="card stat-card">
+            <div class="stat-body">
+                <div>
+                    <div class="stat-label">Success</div>
+                    <div class="stat-value text-success" id="statSuccess">--</div>
+                </div>
+                <div class="stat-icon bg-success-soft">
+                    <i class="bi bi-check-circle"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="card stat-card">
+            <div class="stat-body">
+                <div>
+                    <div class="stat-label">Failed</div>
+                    <div class="stat-value text-danger" id="statFail">--</div>
+                </div>
+                <div class="stat-icon bg-danger-soft">
+                    <i class="bi bi-x-circle"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- REALTIME TASKS -->
+<div class="card mt-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <div class="fw-bold">Realtime Tasks</div>
+        <div class="text-muted small">Cập nhật tự động mỗi 5 giây</div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+            <tr>
+                <th style="width:60px">#</th>
+                <th>TikTok</th>
+                <th>Task</th>
+                <th style="width:140px">Status</th>
+                <th style="width:220px">Time</th>
+            </tr>
+            </thead>
+            <tbody id="dashTaskBody">
+            <tr>
+                <td colspan="5" class="text-center text-muted">Loading...</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    (() => {
+        let timer = null;
+
+        function badge(status) {
+            switch (status) {
+                case "running": return `<span class="badge bg-warning">RUNNING</span>`;
+                case "success": return `<span class="badge bg-success">SUCCESS</span>`;
+                case "fail": return `<span class="badge bg-danger">FAIL</span>`;
+                default: return `<span class="badge bg-secondary">PENDING</span>`;
+            }
+        }
+
+        async function loadDashboard() {
+            try {
+                const [tasksRes, accRes] = await Promise.all([
+                    fetch("/api/tasks/realtime"),
+                    fetch("/api/tiktok/list")
+                ]);
+
+                if (!tasksRes.ok || !accRes.ok) {
+                    location.href = "/admin/login.html";
+                    return;
+                }
+
+                const tasks = await tasksRes.json();
+                const accounts = await accRes.json();
+
+                // Stats
+                document.getElementById("statAccounts").innerText = accounts.length;
+                document.getElementById("statRunning").innerText =
+                    tasks.filter(t => t.status === "running").length;
+                document.getElementById("statSuccess").innerText =
+                    tasks.filter(t => t.status === "success").length;
+                document.getElementById("statFail").innerText =
+                    tasks.filter(t => t.status === "fail").length;
+
+                // Table
+                const rows = tasks.slice(0, 20).map((t, i) => `
+        <tr>
+          <td>${i + 1}</td>
+          <td>${t.tiktok_username || "-"}</td>
+          <td>${t.task_type || "-"}</td>
+          <td>${badge(t.status)}</td>
+          <td class="text-muted small">
+            ${t.started_at || "-"} ${t.finished_at ? "→ " + t.finished_at : ""}
+          </td>
+        </tr>
+      `).join("");
+
+                document.getElementById("dashTaskBody").innerHTML =
+                    rows || `<tr><td colspan="5" class="text-center text-muted">No data</td></tr>`;
+
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        document.getElementById("btnRefreshDash")?.addEventListener("click", loadDashboard);
+
+        // init
+        loadDashboard();
+        timer = setInterval(loadDashboard, 5000);
+
+    })();
+</script>

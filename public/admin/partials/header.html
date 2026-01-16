@@ -1,0 +1,75 @@
+<header id="header" class="header fixed-top d-flex align-items-center">
+    <div class="container-fluid d-flex justify-content-between align-items-center">
+
+        <!-- BRAND -->
+        <div class="d-flex align-items-center">
+            <a href="/admin" class="logo d-flex align-items-center">
+        <span class="d-none d-lg-block fw-bold" style="color:#4154f1">
+          TikTok Automation
+        </span>
+            </a>
+        </div>
+
+        <!-- RIGHT MENU -->
+        <nav class="header-nav ms-auto">
+            <ul class="d-flex align-items-center mb-0">
+
+                <!-- USER -->
+                <li class="nav-item dropdown pe-3">
+                    <a class="nav-link nav-profile d-flex align-items-center pe-0"
+                       href="#"
+                       data-bs-toggle="dropdown">
+                        <i class="bi bi-person-circle fs-4"></i>
+                        <span class="d-none d-md-block dropdown-toggle ps-2">Admin</span>
+                    </a>
+
+                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
+                        <li class="dropdown-header">
+                            <h6>Administrator</h6>
+                            <span>System Admin</span>
+                        </li>
+
+                        <li><hr class="dropdown-divider"></li>
+
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center" href="#" id="btnChangePassword">
+                                <i class="bi bi-key"></i>
+                                <span>Đổi mật khẩu</span>
+                            </a>
+                        </li>
+
+                        <li><hr class="dropdown-divider"></li>
+
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center text-danger" href="#" id="btnLogout">
+                                <i class="bi bi-box-arrow-right"></i>
+                                <span>Đăng xuất</span>
+                            </a>
+                        </li>
+
+                    </ul>
+                </li>
+
+            </ul>
+        </nav>
+    </div>
+</header>
+
+<script>
+    /* ============================
+     * LOGOUT
+     * ============================ */
+    document.getElementById("btnLogout")?.addEventListener("click", function(e){
+        e.preventDefault();
+        document.cookie = "admin_token=; Max-Age=0; path=/";
+        location.href = "/admin/login.html";
+    });
+
+    /* ============================
+     * CHANGE PASSWORD (PLACEHOLDER)
+     * ============================ */
+    document.getElementById("btnChangePassword")?.addEventListener("click", function(e){
+        e.preventDefault();
+        alert("Trang đổi mật khẩu sẽ được triển khai tiếp");
+    });
+</script>

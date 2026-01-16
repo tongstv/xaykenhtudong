@@ -1,0 +1,1 @@
+console.log('NiceAdmin offline assets loaded');

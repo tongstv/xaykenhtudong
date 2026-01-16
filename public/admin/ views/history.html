@@ -1,0 +1,52 @@
+<h3>Lịch sử chạy</h3>
+
+<table class="table table-bordered">
+    <thead>
+    <tr>
+        <th>#</th>
+        <th>TikTok</th>
+        <th>Task</th>
+        <th>Status</th>
+        <th>Action</th>
+    </tr>
+    </thead>
+    <tbody id="tbl"></tbody>
+</table>
+
+<script>
+    function loadHistory(){
+        $.get("/api/tasks/realtime", function(list){
+            let html="";
+            list.forEach((i,idx)=>{
+                html+=`
+      <tr>
+        <td>${idx+1}</td>
+        <td>${i.tiktok_username||""}</td>
+        <td>${i.task_type}</td>
+        <td>${i.status}</td>
+        <td>
+          ${i.history_id?`<button onclick="log(${i.history_id})">Log</button>`:""}
+          ${i.status==="fail"&&i.history_id?`<button onclick="retry(${i.history_id})">Retry</button>`:""}
+        </td>
+      </tr>`;
+            });
+            $("#tbl").html(html);
+        });
+    }
+    loadHistory();
+    setInterval(loadHistory,5000);
+
+    function log(id){
+        $.get("/api/history/log?id="+id,function(r){
+            alert(r.log||"");
+        });
+    }
+    function retry(id){
+        $.ajax({
+            url:"/api/tasks/retry",
+            method:"POST",
+            contentType:"application/json",
+            data:JSON.stringify({history_id:id})
+        }).done(loadHistory);
+    }
+</script>

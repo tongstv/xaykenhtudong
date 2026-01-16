@@ -1,0 +1,23 @@
+.header {
+    height: 60px;
+    background: #fff;
+    border-bottom: 1px solid #eaeaea;
+    z-index: 997;
+}
+
+.logo {
+    text-decoration: none;
+    font-size: 18px;
+}
+
+.header-nav .nav-profile {
+    color: #012970;
+    font-weight: 600;
+}
+
+.footer {
+    padding: 20px 0;
+    font-size: 14px;
+    color: #6c757d;
+    border-top: 1px solid #eaeaea;
+}

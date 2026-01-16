@@ -1,0 +1,27 @@
+<h3>Gửi tin nhắn TikTok</h3>
+
+<select id="acc" class="form-select mb-2"></select>
+<input id="url" class="form-control mb-2" placeholder="URL TikTok người nhận">
+<textarea id="msg" class="form-control mb-2" placeholder="Nội dung"></textarea>
+<button class="btn btn-success" id="send">Gửi</button>
+
+<script>
+    $.get("/api/tiktok/list", function(list){
+        list.forEach(a=>{
+            $("#acc").append(`<option value="${a.id}">${a.username||a.tiktok_id}</option>`);
+        });
+    });
+
+    $("#send").click(function(){
+        $.ajax({
+            url:"/api/tasks/send-message",
+            method:"POST",
+            contentType:"application/json",
+            data:JSON.stringify({
+                tiktok_account_id:$("#acc").val(),
+                url:$("#url").val(),
+                message:$("#msg").val()
+            })
+        }).done(()=>alert("Đã tạo task"));
+    });
+</script>

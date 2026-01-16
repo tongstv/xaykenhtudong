@@ -1,0 +1,11 @@
+<h3>TikTok Accounts</h3>
+<ul id="list"></ul>
+
+<script>
+    apiFetch("/api/tiktok/list")
+        .then(r=>r.json())
+        .then(list=>{
+            document.getElementById("list").innerHTML=
+                list.map(i=>`<li>${i.username}</li>`).join("");
+        });
+</script>
